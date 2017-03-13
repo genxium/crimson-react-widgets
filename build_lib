@@ -1,0 +1,17 @@
+#!/bin/bash
+
+basedir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+src_files="$basedir/src/*.js"
+
+babel_call="node --max_old_space_size=4096 $basedir/node_modules/babel-cli/bin/babel.js"
+
+mkdir -p $basedir/lib
+
+export UV_THREADPOOL_SIZE=100
+for src_file in $src_files
+do
+	lib_file="$(echo $src_file | sed 's/\(.*\)\/src\/\(.*\)\.js/\1\/lib\/\2\.js/g')"   
+	echo "$src_file > $lib_file"
+	$babel_call $src_file > $lib_file
+done

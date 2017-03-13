@@ -1,2 +1,2 @@
-exports.getRenderedComponentSize = require('./lib/shared').getRenderedComponentSize;
+exports.getRenderedComponentSize = require('./lib/util').getRenderedComponentSize;
 exports.Paginator = require('./lib/Paginator').default;

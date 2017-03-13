@@ -1,34 +1,34 @@
 'use strict';
 
 require('whatwg-fetch');
-var ReactDOM = require('react-dom');
+const ReactDOM = require('react-dom');
 
-var dictToSortedQueryStr = function dictToSortedQueryStr(dict) {
-	var keys = Object.keys(dict);
+const dictToSortedQueryStr = function (dict) {
+	let keys = Object.keys(dict);
 	keys.sort();
-	var paramList = [];
-	for (var idx = 0; idx < keys.length; ++idx) {
-		var k = keys[idx];
-		var v = dict[k];
+	let paramList = [];
+	for (let idx = 0; idx < keys.length; ++idx) {
+		const k = keys[idx];
+		const v = dict[k];
 		paramList.push(k + "=" + encodeURIComponent(v));
 	}
 	return paramList.join('&');
 };
 
-var httpGet = function httpGet(url, paramsDict) {
+const httpGet = function(url, paramsDict) {
 	if (!paramsDict || Object.keys(paramsDict).length == 0) return fetch(url, {
-		credentials: 'same-origin'
+		credentials: 'same-origin',
 	});
-	var concatenated = url + "?" + dictToSortedQueryStr(paramsDict);
+	const concatenated = url + "?" + dictToSortedQueryStr(paramsDict);
 	return fetch(concatenated, {
-		credentials: 'same-origin'
+		credentials: 'same-origin',
 	});
 };
 
-var getRenderedComponentSize = function getRenderedComponentSize(ref) {
+const getRenderedComponentSize = function(ref) {
 	// NOTE: This function could ONLY be applied to MOUNTED COMPONENT!!!
 	if (undefined === ref || null === ref) return null;
-	var domElement = ReactDOM.findDOMNode(ref);
+	const domElement = ReactDOM.findDOMNode(ref);
 	return {
 		width: domElement.clientWidth,
 		height: domElement.clientHeight
@@ -37,4 +37,3 @@ var getRenderedComponentSize = function getRenderedComponentSize(ref) {
 
 exports.httpGet = httpGet;
 exports.getRenderedComponentSize = getRenderedComponentSize;
-
