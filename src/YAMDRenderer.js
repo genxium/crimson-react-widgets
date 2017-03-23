@@ -22,8 +22,8 @@ const YAMDRenderer = React.createClass({
 		});
 	},
 	imgSubstituteToRenderableAsync: function (content, previewableImageList) {
-    const widgetRef = this;
-    const props = widgetRef.props;
+		const widgetRef = this;
+		const props = widgetRef.props;
 
 		if (!previewableImageList || 0 >= previewableImageList.length) {
 			return new Promise(function (resolve, reject) {
@@ -47,8 +47,8 @@ const YAMDRenderer = React.createClass({
 		});
 	},
 	videoSubstituteToRenderableAsync: function (content, previewableVideoList) {
-    const widgetRef = this;
-    const props = widgetRef.props;
+		const widgetRef = this;
+		const props = widgetRef.props;
 
 		if (!previewableVideoList || 0 >= previewableVideoList.length) {
 			return new Promise(function (resolve, reject) {
@@ -74,8 +74,8 @@ const YAMDRenderer = React.createClass({
 		});
 	},
 	ktxSubstituteToRenderableAsync: function (content, disabled) {
-    const widgetRef = this;
-    const props = widgetRef.props;
+		const widgetRef = this;
+		const props = widgetRef.props;
 
 		if (true == disabled) return new Promise(function (resolve, reject) {
 			resolve(content);
@@ -95,12 +95,32 @@ const YAMDRenderer = React.createClass({
 			resolve(newContent);
 		});
 	},
+	alnctrContentSubmittableToRenderableAsync: function (content) {
+		const widgetRef = this;
+		const props = widgetRef.props;
+
+		const regex = new RegExp('\!\{' + props.alignCenterTag + '\}\%([^%]+)\%', 'g');
+		const newContent = content.replace(regex, function (match, param1, offset, wholeString) {
+			try {
+				const toRenderParam = param1.replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/\\[rn]/g, '\\n');
+				let strongRegex = /<strong>([\s\S]+)<\/strong>/g;
+				let tmp = toRenderParam.replace(strongRegex, "<span style=\'font-weight: bold; font-size: 24px;\'>$1</span>");
+				const replacementTag = "<div style=\'width: 100%; text-align: center;\'>" + tmp + "</div>";
+				return replacementTag;
+			} catch (err) {
+				return param1;
+			}
+		});
+		return new Promise(function (resolve, reject) {
+			resolve(newContent);
+		});
+	},
 	generateRandomMermaidId: function (idxOfRegExpTraversal) {
 		return "mermaid-" + idxOfRegExpTraversal;
 	},
 	mermaidSubstituteToRenderableAsync: function (content, disabled) {
-    const widgetRef = this;
-    const props = widgetRef.props;
+		const widgetRef = this;
+		const props = widgetRef.props;
 
 		if (true == disabled) return new Promise(function (resolve, reject) {
 			resolve(content);
@@ -159,14 +179,14 @@ const YAMDRenderer = React.createClass({
 				return widgetRef.mermaidSubstituteToRenderableAsync(newSource, disableMermaid);
 			})
 			.then(function (rendered) {
-        return new Promise(function(resolve, reject) {
-          widgetRef.setState({
-            mermaidSubstituteResidualList: rendered.substitueResidualList,
-            dangerousInnerHTML: rendered.content,
-          }, function () {
-            resolve(true);
-          });
-        });
+				return new Promise(function (resolve, reject) {
+					widgetRef.setState({
+						mermaidSubstituteResidualList: rendered.substitueResidualList,
+						dangerousInnerHTML: rendered.content,
+					}, function () {
+						resolve(true);
+					});
+				});
 			});
 	},
 	componentDidMount() {
