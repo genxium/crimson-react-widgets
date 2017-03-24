@@ -175,6 +175,9 @@ const YAMDRenderer = React.createClass({
 			.then(function (newSource) {
 				return widgetRef.ktxSubstituteToRenderableAsync(newSource, disableTeX);
 			})
+      .then(function (newSource) {
+        return widgetRef.alnctrContentSubmittableToRenderableAsync(newSource);
+      })
 			.then(function (newSource) {
 				return widgetRef.mermaidSubstituteToRenderableAsync(newSource, disableMermaid);
 			})
