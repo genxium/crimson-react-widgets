@@ -9,7 +9,7 @@ const katex = require('katex');
 var md = require('markdown-it')()
 	.disable(['image']);
 
-if (undefined !== mermaid && null !== mermaid) {
+if ('undefined' != typeof(mermaid)) {
 	mermaid.initialize({
 		startOnLoad: true,
 	});
@@ -228,7 +228,8 @@ const YAMDRenderer = React.createClass({
 		const props = widgetRef.props;
 		const disableMermaid = props.disableMermaid;
 		if (true == disableMermaid) return;
-		if (undefined === mermaid || null === mermaid) return;
+
+    if ('undefined' == typeof(mermaid)) return;
 		mermaid.init(props.mermaidOptions, ".mermaid");
 	},
 });
