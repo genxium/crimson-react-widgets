@@ -10,27 +10,16 @@ const SINGLE_UPLOADER_STATE = require('./ImageSelectorBundle').SINGLE_UPLOADER_S
 class StatelessMultiImageSelector extends React.Component {
   constructor(props) {
     super(props);
+    this._singleSelectorCollection = {};
   }
 
   startUpload() {
     const widgetRef = this;
-    const props = widgetRef.props;
-    const bundleListManager = props.bundleListManager;
-    const onSingleUploadedBridge = props.onSingleUploadedBridge;
-
-    const bundleList = bundleListManager.bundleList;
-    for (let i = 0; i < bundleList.length; i++) {
-      const bundle = bundleList[i];
-      if (SINGLE_UPLOADER_STATE.UPLOADED == bundle.uploaderState) {
-        onSingleUploadedBridge(i, true);
-        continue;
-      }
-      if (SINGLE_UPLOADER_STATE.LOCALLY_PREVIEWING != bundle.uploaderState) {
-        // NOTE: Invalid block here, the player should NEVER trigger this block.
-        continue;
-      }
-      bundle.extUploader.start();
-    }
+    for (let k in widgetRef._singleSelectorCollection) {
+      const singleSelector = widgetRef._singleSelectorCollection[k];
+      if (!singleSelector) continue;
+      singleSelector.startUpload();
+    };
   }
 
   getPreviewableImageList() {
@@ -55,6 +44,9 @@ class StatelessMultiImageSelector extends React.Component {
   render() {
     const widgetRef = this;
     const props = widgetRef.props;
+
+    const View = props.View;
+
     const bundleListManager = props.bundleListManager;
     const shouldDisable = props.shouldDisable;
     const onSingleNewBundleCreatedBridge = props.onSingleNewBundleCreatedBridge;
@@ -63,36 +55,32 @@ class StatelessMultiImageSelector extends React.Component {
     const onSingleProgressBridge = props.onSingleProgressBridge;
     const onSingleLocalImageAddedBridge = props.onSingleLocalImageAddedBridge;
     const singleImageSelectorSize = props.singleImageSelectorSize;
-    const uploadEndpoint = props.uploadEndpoint;
-    const singleUploadCredentialsEndpoint = props.singleUploadCredentialsEndpoint;
     const showFileRequirementHint = props.showFileRequirementHint;
     const singleFileSizeLimitBytes = props.singleFileSizeLimitBytes;
     const allowedMimeList = props.allowedMimeList;
     const uploadedMark = props.uploadedMark;
-    const View = props.View;
 
     const bundleList = bundleListManager.bundleList;
     let selectorList = [];
-    let idleSelectorExists = false;
     for (let i = 0; i < bundleList.length; ++i) {
       const bundle = bundleList[i];
-      const isIdle = (SINGLE_UPLOADER_STATE.IDLE == bundle.uploaderState);
-      const shouldHide = (idleSelectorExists && isIdle);
       const singleSelector = (
         <View
         key={singleSelectorContainerKeyPrefix + bundle.id}
         style={{
-          display: (shouldHide ? 'none' : 'inline-block'),
+          display: 'inline-block',
           marginRight: 5,
         }}
         >
           <StatelessSingleImageSelector
           key={bundle.id}
           listIndex={i}
+          ref={(c) => {
+            // NOTE: Deliberately not excluding the null refs!
+            widgetRef._singleSelectorCollection[i] = c;
+          }}
           bundle={bundle}
           sizePx={singleImageSelectorSize}
-          uploadEndpoint={uploadEndpoint}
-          singleUploadCredentialsEndpoint={singleUploadCredentialsEndpoint}
           showFileRequirementHint={showFileRequirementHint}
           singleFileSizeLimitBytes={singleFileSizeLimitBytes}
           allowedMimeList={allowedMimeList}
@@ -100,7 +88,7 @@ class StatelessMultiImageSelector extends React.Component {
           progressBarColor={props.progressBarColor}
           BrowserButtonComponent={props.BrowserButtonComponent}
           shouldDisable={ () => {
-            return (shouldHide || shouldDisable());
+            return shouldDisable();
           }}
           onNewBundleCreatedBridge={ (idx, props) => {
             onSingleNewBundleCreatedBridge(idx, props); 
@@ -122,9 +110,6 @@ class StatelessMultiImageSelector extends React.Component {
         </View>
       );
       selectorList.push(singleSelector);
-      if (isIdle) {
-        idleSelectorExists = true;
-      }
     }
 
     return (
@@ -137,30 +122,31 @@ class StatelessMultiImageSelector extends React.Component {
 }
 
 StatelessMultiImageSelector.propTypes = {
-    bundleListManager: React.PropTypes.any.isRequired,
-    shouldDisable: React.PropTypes.func.isRequired,
+  View: React.PropTypes.func.isRequired, 
+  Image: React.PropTypes.func.isRequired, 
 
-    onSingleImageEditorTriggeredBridge: React.PropTypes.func.isRequired,
+  bundleListManager: React.PropTypes.any.isRequired,
+  shouldDisable: React.PropTypes.func.isRequired,
 
-    onSingleNewBundleCreatedBridge: React.PropTypes.func.isRequired,
+  onSingleImageEditorTriggeredBridge: React.PropTypes.func.isRequired,
 
-    onSingleUploadedBridge: React.PropTypes.func.isRequired,
-    onSingleProgressBridge: React.PropTypes.func.isRequired,
-    onSingleLocalImageAddedBridge: React.PropTypes.func.isRequired,
+  onSingleNewBundleCreatedBridge: React.PropTypes.func.isRequired,
 
-    singleImageSelectorSize: React.PropTypes.any.isRequired,
+  onSingleUploadedBridge: React.PropTypes.func.isRequired,
+  onSingleProgressBridge: React.PropTypes.func.isRequired,
+  onSingleLocalImageAddedBridge: React.PropTypes.func.isRequired,
 
-    uploadEndpoint: React.PropTypes.string.isRequired,
-    singleUploadCredentialsEndpoint: React.PropTypes.string.isRequired, 
-    showFileRequirementHint: React.PropTypes.func.isRequired,
-    singleFileSizeLimitBytes: React.PropTypes.number.isRequired,
-    allowedMimeList: React.PropTypes.array.isRequired,
+  singleImageSelectorSize: React.PropTypes.any.isRequired,
 
-    uploadedMark: React.PropTypes.any.isRequired,
-    progressBarColor: React.PropTypes.string.isRequired, 
-    BrowserButtonComponent: React.PropTypes.func.isRequired,
+  showFileRequirementHint: React.PropTypes.func.isRequired,
+  singleFileSizeLimitBytes: React.PropTypes.number.isRequired,
+  allowedMimeList: React.PropTypes.array.isRequired,
 
-    queryAndSetSingleBundleExtUploaderCredentialsAsync: React.PropTypes.func.isRequired,
+  uploadedMark: React.PropTypes.any.isRequired,
+  progressBarColor: React.PropTypes.string.isRequired, 
+  BrowserButtonComponent: React.PropTypes.func.isRequired,
+
+  queryAndSetSingleBundleExtUploaderCredentialsAsync: React.PropTypes.func.isRequired,
 };
 
 exports.default = StatelessMultiImageSelector;

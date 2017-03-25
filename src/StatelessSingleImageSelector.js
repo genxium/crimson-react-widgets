@@ -67,10 +67,10 @@ class StatelessSingleImageSelector extends React.Component {
     const bundle = props.bundle;
     const shouldDisable = props.shouldDisable;
     const onLocalImageAddedBridge = props.onLocalImageAddedBridge;
+    const onUploadedBridge = props.onUploadedBridge;
 
     // Reference http://www.plupload.com/docs/v2/Uploader.
     const uploader = new PlupLoad.Uploader({
-      url: props.uploadEndpoint,
       browse_button: ReactDOM.findDOMNode(widgetRef._browseBtnRef),
       multi_selection: false,
     });
@@ -95,6 +95,7 @@ class StatelessSingleImageSelector extends React.Component {
       }
 
       uploaderSelf.disableBrowse(); // NOTE: Browsing is disabled once a valid image is added for previewing.
+      uploaderSelf.refresh();
       widgetRef._previewLoader.readAsDataURL(targetFile.getNative());
     });
 
@@ -120,10 +121,11 @@ class StatelessSingleImageSelector extends React.Component {
     }
 
     /*
-      // Typical credentials are set into the http request headers or multipart body. In the case of plupload with Chinenet as CDN provider, one might have to set the followings. 
+      // Besides, typical credentials, e.g. `upload token` or simply `uptoken`, are set into the http request headers or multipart body. In the case of plupload with Chinenet as CDN provider, one might have to set the followings. 
 
-      header: {
-        // Add additional http request header properties, e.g. "content-type": "multipart/form-data; boundary=<boundary>" 
+      url: <host endpoint>,
+      headers: {
+        // Add additional http request header properties, e.g. 'Content-Type': 'multipart/form-data' 
       }
 
       multipart_params: {
@@ -159,11 +161,11 @@ class StatelessSingleImageSelector extends React.Component {
   render() {
     const widgetRef = this;
     const props = widgetRef.props;
-    const onImageEditorTriggeredBridge = props.onImageEditorTriggeredBridge;
-    const Button = props.Button;
-    const Text = props.Text;
+
     const View = props.View;
     const Image = props.Image;
+
+    const onImageEditorTriggeredBridge = props.onImageEditorTriggeredBridge;
     const bundle = props.bundle;
     const sizePx = props.sizePx;
     const shouldDisable = props.shouldDisable;
@@ -298,6 +300,9 @@ class StatelessSingleImageSelector extends React.Component {
 }
 
 StatelessSingleImageSelector.propTypes = {
+  View: React.PropTypes.func.isRequired, 
+  Image: React.PropTypes.func.isRequired, 
+
   sizePx: React.PropTypes.object.isRequired,
   bundle: React.PropTypes.any.isRequired,
   listIndex: React.PropTypes.number.isRequired, // NOTE: Access to `listIndex` is deliberately made DYNAMIC in this file!
@@ -310,9 +315,6 @@ StatelessSingleImageSelector.propTypes = {
   onUploadedBridge: React.PropTypes.func.isRequired,
   onProgressBridge: React.PropTypes.func.isRequired,
   onLocalImageAddedBridge: React.PropTypes.func.isRequired,
-
-  uploadEndpoint: React.PropTypes.string.isRequired,
-  singleUploadCredentialsEndpoint: React.PropTypes.string.isRequired, 
 
   showFileRequirementHint: React.PropTypes.func.isRequired,
   singleFileSizeLimitBytes: React.PropTypes.number.isRequired,
