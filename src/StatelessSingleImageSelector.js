@@ -68,6 +68,7 @@ class StatelessSingleImageSelector extends React.Component {
     const shouldDisable = props.shouldDisable;
     const onLocalImageAddedBridge = props.onLocalImageAddedBridge;
     const onUploadedBridge = props.onUploadedBridge;
+    const onProgressBridge = props.onProgressBridge;
 
     // Reference http://www.plupload.com/docs/v2/Uploader.
     const uploader = new PlupLoad.Uploader({
@@ -97,6 +98,17 @@ class StatelessSingleImageSelector extends React.Component {
       uploaderSelf.disableBrowse(); // NOTE: Browsing is disabled once a valid image is added for previewing.
       uploaderSelf.refresh();
       widgetRef._previewLoader.readAsDataURL(targetFile.getNative());
+    });
+    
+    uploader.bind('UploadProgress', function(up, file) {
+      onProgressBridge(widgetRef.props.listIndex, {
+        uploaderState: SINGLE_UPLOADER_STATE.UPLOADING,
+        progressPercentage: file.percent,
+      });
+    });
+    
+    uploader.bind('FileUploaded', function(up, file, info) {
+      onUploadedBridge(widgetRef.props.listIndex, true);
     });
 
     uploader.bind('Error', function (up, err) {
