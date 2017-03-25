@@ -9,9 +9,9 @@ const SINGLE_UPLOADER_STATE = {
 };
 
 const BATCH_UPLOADER_STATE = {
-	SOME_FAILED: 0,
-	SOME_UPLOADING: 1,
-	ALL_UPLOADED: 2,
+	SOME_FAILED: (1 << 0),
+	SOME_UPLOADING: (1 << 1),
+	ALL_UPLOADED: (1 << 2),
 };
 
 class SingleImageSelectorBundle {
