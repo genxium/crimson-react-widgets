@@ -124,12 +124,9 @@ class StatelessSingleImageSelector extends React.Component {
       // Besides, typical credentials, e.g. `upload token` or simply `uptoken`, are set into the http request headers or multipart body. In the case of plupload with Chinenet as CDN provider, one might have to set the followings. 
 
       url: <host endpoint>,
-      headers: {
-        // Add additional http request header properties, e.g. 'Content-Type': 'multipart/form-data' 
-      }
-
       multipart_params: {
-        // Add multipart {name => value} form-data
+        // Add extra multipart {name => value} form-data
+        token: <the upload token> 
       }
     */
     props.queryAndSetSingleBundleExtUploaderCredentialsAsync(bundle.extUploader)
