@@ -2,16 +2,19 @@
 
 const SINGLE_UPLOADER_STATE = {
   CREATED: -1,
-  IDLE: 0,
+  INITIALIZED: 0, // Bound to an extUploader.
   LOCALLY_PREVIEWING: 1,
   UPLOADING: 2,
   UPLOADED: 3,
 };
 
 const BATCH_UPLOADER_STATE = {
-	SOME_FAILED: (1 << 0),
-	SOME_UPLOADING: (1 << 1),
-	ALL_UPLOADED: (1 << 2),
+  NONEXISTENT_UPLOADER: -1,
+	ALL_UPLOADED: 0,
+	SOME_CREATED: (1 << 1),
+	SOME_INITIALIZED: (1 << 2),
+	SOME_LOCALLY_PREVIEWING: (1 << 3),
+	SOME_UPLOADING: (1 << 4),
 };
 
 class SingleImageSelectorBundle {
@@ -59,7 +62,7 @@ class SingleImageSelectorBundle {
 
 	isOccupied() {
 		if (SINGLE_UPLOADER_STATE.CREATED == this.uploaderState) return false;
-		if (SINGLE_UPLOADER_STATE.IDLE == this.uploaderState) return false;
+		if (SINGLE_UPLOADER_STATE.INITIALIZED == this.uploaderState) return false;
 		return true;
 	}
 	

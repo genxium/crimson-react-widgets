@@ -6,6 +6,7 @@ const singleSelectorContainerKeyPrefix = 'whateveryoulike-';
 const StatelessSingleImageSelector = require('./StatelessSingleImageSelector').default;
 
 const SINGLE_UPLOADER_STATE = require('./ImageSelectorBundle').SINGLE_UPLOADER_STATE;
+const BATCH_UPLOADER_STATE = require('./ImageSelectorBundle').BATCH_UPLOADER_STATE;
 
 class StatelessMultiImageSelector extends React.Component {
   constructor(props) {
@@ -41,6 +42,26 @@ class StatelessMultiImageSelector extends React.Component {
     return imageList;
   }
 
+  getBatchUploaderStateSync() {
+    let toRet = 0;
+		const widgetRef = this;
+    const props = widgetRef.props;
+    const bundleListManager = props.bundleListManager;
+
+    const bundleList = bundleListManager.bundleList;
+    if (0 == bundleList.length) return BATCH_UPLOADER_STATE.NONEXISTENT_UPLOADER;
+
+		for (let i = 0; i < bundleList.length; ++i) {
+			const bundle = bundleList[i];
+			if (SINGLE_UPLOADER_STATE.CREATED == bundle.uploaderState) toRet |= BATCH_UPLOADER_STATE.SOME_CREATED;
+			else if (SINGLE_UPLOADER_STATE.INITIALIZED == bundle.uploaderState) toRet |= BATCH_UPLOADER_STATE.SOME_INITIALIZED;
+			else if (SINGLE_UPLOADER_STATE.LOCALLY_PREVIEWING == bundle.uploaderState) toRet |= BATCH_UPLOADER_STATE.SOME_LOCALLY_PREVIEWING;
+			else if (SINGLE_UPLOADER_STATE.UPLOADING == bundle.uploaderState) toRet |= BATCH_UPLOADER_STATE.SOME_UPLOADING;
+			else continue; // UPLOADED
+		}
+    return toRet;
+  }
+
   render() {
     const widgetRef = this;
     const props = widgetRef.props;
@@ -49,7 +70,7 @@ class StatelessMultiImageSelector extends React.Component {
 
     const bundleListManager = props.bundleListManager;
     const shouldDisable = props.shouldDisable;
-    const onSingleNewBundleCreatedBridge = props.onSingleNewBundleCreatedBridge;
+    const onSingleNewBundleInitializedBridge = props.onSingleNewBundleInitializedBridge;
     const onSingleImageEditorTriggeredBridge = props.onSingleImageEditorTriggeredBridge;
     const onSingleUploadedBridge = props.onSingleUploadedBridge;
     const onSingleProgressBridge = props.onSingleProgressBridge;
@@ -66,7 +87,7 @@ class StatelessMultiImageSelector extends React.Component {
       const bundle = bundleList[i];
       const singleSelector = (
         <View
-        key={singleSelectorContainerKeyPrefix + bundle.id}
+        key={singleSelectorContainerKeyPrefix + i.toString()}
         style={{
           display: 'inline-block',
           marginRight: 5,
@@ -90,8 +111,8 @@ class StatelessMultiImageSelector extends React.Component {
           shouldDisable={ () => {
             return shouldDisable();
           }}
-          onNewBundleCreatedBridge={ (idx, props) => {
-            onSingleNewBundleCreatedBridge(idx, props); 
+          onNewBundleInitializedBridge={ (idx, props) => {
+            onSingleNewBundleInitializedBridge(idx, props); 
           }}
           onImageEditorTriggeredBridge={ (idx) => {
             onSingleImageEditorTriggeredBridge(idx);
@@ -130,7 +151,7 @@ StatelessMultiImageSelector.propTypes = {
 
   onSingleImageEditorTriggeredBridge: React.PropTypes.func.isRequired,
 
-  onSingleNewBundleCreatedBridge: React.PropTypes.func.isRequired,
+  onSingleNewBundleInitializedBridge: React.PropTypes.func.isRequired,
 
   onSingleUploadedBridge: React.PropTypes.func.isRequired,
   onSingleProgressBridge: React.PropTypes.func.isRequired,

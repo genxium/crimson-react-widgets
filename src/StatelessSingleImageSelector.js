@@ -29,7 +29,7 @@ class StatelessSingleImageSelector extends React.Component {
     if (null === bundle || undefined === bundle) return;
 
     if (SINGLE_UPLOADER_STATE.CREATED != bundle.uploaderState) {
-      if (SINGLE_UPLOADER_STATE.IDLE == bundle.uploaderState && undefined !== bundle.extUploader && null !== bundle.extUploader) {
+      if (SINGLE_UPLOADER_STATE.INITIALIZED == bundle.uploaderState && undefined !== bundle.extUploader && null !== bundle.extUploader) {
         bundle.extUploader.disableBrowse(props.shouldDisable());
       }
       if (undefined !== bundle.extUploader && null !== bundle.extUploader) {
@@ -39,8 +39,8 @@ class StatelessSingleImageSelector extends React.Component {
     }
 
     const extUploader = widgetRef.createExtUploader();
-    props.onNewBundleCreatedBridge(widgetRef.props.listIndex, {
-      uploaderState: SINGLE_UPLOADER_STATE.IDLE,
+    props.onNewBundleInitializedBridge(widgetRef.props.listIndex, {
+      uploaderState: SINGLE_UPLOADER_STATE.INITIALIZED,
       progressPercentage: 0.0,
       effectiveImgSrc: null,
       extUploader: extUploader,
@@ -52,7 +52,7 @@ class StatelessSingleImageSelector extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-
+    this._softReset();
   }
 
   getPreviewableImage() {
@@ -182,8 +182,8 @@ class StatelessSingleImageSelector extends React.Component {
     const progressBarSectionHeightPx = 32;
     const progressBarHeightPx = 10;
     const shouldHideProgressBar = (SINGLE_UPLOADER_STATE.UPLOADING != bundle.uploaderState);
-    const shouldHideImage = (SINGLE_UPLOADER_STATE.IDLE == bundle.uploaderState);
-    const shouldHideBrowseButton = (SINGLE_UPLOADER_STATE.IDLE != bundle.uploaderState || shouldDisable());
+    const shouldHideImage = (SINGLE_UPLOADER_STATE.INITIALIZED == bundle.uploaderState);
+    const shouldHideBrowseButton = (SINGLE_UPLOADER_STATE.INITIALIZED != bundle.uploaderState || shouldDisable());
 
     const shouldDisableEditButton = (!bundle.isOccupied() || shouldDisable());
 
@@ -319,7 +319,7 @@ StatelessSingleImageSelector.propTypes = {
 
   onImageEditorTriggeredBridge: React.PropTypes.func.isRequired,
 
-  onNewBundleCreatedBridge: React.PropTypes.func.isRequired,
+  onNewBundleInitializedBridge: React.PropTypes.func.isRequired,
 
   onUploadedBridge: React.PropTypes.func.isRequired,
   onProgressBridge: React.PropTypes.func.isRequired,
