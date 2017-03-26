@@ -220,7 +220,7 @@ class StatelessSingleImageSelector extends React.Component {
     const uploadedMark = (
       <View
         style={{
-          display: ((!shouldDisable() && SINGLE_UPLOADER_STATE.UPLOADED == bundle.uploaderState) ? 'inherit' : 'none'),
+          display: (SINGLE_UPLOADER_STATE.UPLOADED == bundle.uploaderState ? 'inherit' : 'none'),
           fontSize: 16,
           position: "absolute",
           top: uploadedMarkOffsetPx.top,
