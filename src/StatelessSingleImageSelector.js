@@ -247,8 +247,6 @@ class StatelessSingleImageSelector extends React.Component {
             display: (shouldHideImage ? "none" : "block"),
             width: sizePx.w,
             height: (shouldHideImage ? 0 : (sizePx.h - progressBarSectionHeightPx)),
-            textAlign: "center",
-            verticalAlign: "middle",
             objectFit: "contain",
           }}
           src={bundle.effectiveImgSrc}
@@ -263,7 +261,8 @@ class StatelessSingleImageSelector extends React.Component {
             position: "relative",
             width: sizePx.w,
             height: progressBarSectionHeightPx,
-            textAlign: "center"
+            textAlign: "center",
+            verticalAlign: "middle",
           }}>
           {progressBar}
         </View>
@@ -274,9 +273,13 @@ class StatelessSingleImageSelector extends React.Component {
     const browseButton = (
       <View
       style={{
+        position: "absolute",
         display: (shouldHideBrowseButton ? "none" : "inline-block"),
         width: sizePx.w,
         height: (shouldHideBrowseButton ? 0 : sizePx.h),
+        textAlign: "center",
+        verticalAlign: "middle",
+        lineHeight: parseInt(sizePx.h) + 'px',
       }}
       >
         <BrowserButtonComponent
