@@ -35,7 +35,7 @@ class StatelessSingleImageSelector extends React.Component {
     });
   }
 
-  _updatePluploadExtUploaderEventBinding(extUploader) {
+  _initializePluploadExtUploaderEvtBinding(extUploader) {
     const widgetRef = this;
     const props = widgetRef.props;
     const bundle = props.bundle;
@@ -95,21 +95,17 @@ class StatelessSingleImageSelector extends React.Component {
     const props = widgetRef.props;
     const bundle = props.bundle;
 
-    if (null === bundle || undefined === bundle) return;
-
+    if (null === bundle || undefined === bundle)  return;
     if (SINGLE_UPLOADER_STATE.CREATED != bundle.uploaderState) {
-      if (SINGLE_UPLOADER_STATE.INITIALIZED == bundle.uploaderState && undefined !== bundle.extUploader && null !== bundle.extUploader) {
-        bundle.extUploader.disableBrowse(props.shouldDisable());
-      }
-      if (undefined !== bundle.extUploader && null !== bundle.extUploader) {
-        widgetRef._updatePluploadExtUploaderListIndex();
-        bundle.extUploader.refresh(); // NOTE: This is to update the `overlying browseButton` height according to the `seemingly browseButton` height. 
-      }
+      if (undefined === bundle.extUploader || null === bundle.extUploader)  return;
+      widgetRef._updatePluploadExtUploaderListIndex();
+      bundle.extUploader.refresh(); // NOTE: This is to update the `overlying browseButton` height according to the `seemingly browseButton` height. 
+       bundle.extUploader.disableBrowse(props.shouldDisable());
       return;
     }
 
     const extUploader = widgetRef.createExtUploader();
-    widgetRef._updatePluploadExtUploaderEventBinding(extUploader);
+    widgetRef._initializePluploadExtUploaderEvtBinding(extUploader);
     props.onNewBundleInitializedBridge(widgetRef.props.listIndex, {
       uploaderState: SINGLE_UPLOADER_STATE.INITIALIZED,
       progressPercentage: 0.0,
@@ -119,11 +115,13 @@ class StatelessSingleImageSelector extends React.Component {
   }
 
   componentDidMount() {
-    this._softReset();
+    const widgetRef = this;
+    widgetRef._softReset();
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this._softReset();
+    const widgetRef = this;
+    widgetRef._softReset();
   }
 
   getPreviewableImage() {
@@ -301,6 +299,7 @@ class StatelessSingleImageSelector extends React.Component {
     const BrowserButtonComponent = props.BrowserButtonComponent;
     const browseButton = (
       <View
+      key='single-image-selector-browse-btn'
       style={{
         position: "absolute",
         display: (shouldHideBrowseButton ? "none" : "inline-block"),
@@ -310,14 +309,12 @@ class StatelessSingleImageSelector extends React.Component {
         verticalAlign: "middle",
         lineHeight: parseInt(sizePx.h) + 'px',
       }}
+      ref={function (c) {
+        if (!c) return;
+        widgetRef._browseBtnRef = c;
+      }}
       >
-        <BrowserButtonComponent
-          key='single-image-selector-browse-btn'
-          ref={function (c) {
-            if (!c) return;
-            widgetRef._browseBtnRef = c;
-          }}
-        />
+        <BrowserButtonComponent />
       </View>
     );
 

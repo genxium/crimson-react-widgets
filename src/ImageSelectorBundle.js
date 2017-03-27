@@ -17,8 +17,18 @@ const BATCH_UPLOADER_STATE = {
 	SOME_UPLOADING: (1 << 4),
 };
 
+function localGuid() {
+  const s4 = function() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  };
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
 class SingleImageSelectorBundle {
   constructor(props) {
+    this.id =  localGuid();
 		if (null === props || undefined === props) {
 			// NOTE: All of `uploaderState`, `effectiveImgSrc` and `progressPercentage` are app-scope identifiers/variables, which are independent of CDN provider, e.g. Qiniu.
 			this.uploaderState = SINGLE_UPLOADER_STATE.CREATED;
@@ -134,8 +144,14 @@ class SingleImageSelectorBundleListManager {
 		const instance = this;
 		let newBundleList = [];
 		for (let i = 0; i < instance.bundleList.length; ++i) {
-			if (i == idx) continue;
 			const bundle = instance.bundleList[i];
+			if (i == idx) { 
+        if (undefined !== bundle.extUploader && null !== bundle.extUploader) {
+          bundle.extUploader.unbindAll();
+          bundle.extUploader.destroy();
+        }
+        continue;
+      }
 			newBundleList.push(bundle);
 		}
 		instance.bundleList = newBundleList;

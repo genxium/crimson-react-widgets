@@ -87,17 +87,17 @@ class StatelessMultiImageSelector extends React.Component {
       const bundle = bundleList[i];
       const singleSelector = (
         <View
-        key={singleSelectorContainerKeyPrefix + i.toString()}
+        key={singleSelectorContainerKeyPrefix + bundle.id}
         style={{
           display: 'inline-block',
           marginRight: 5,
         }}
         >
           <StatelessSingleImageSelector
-          key={bundle.id}
+          key={'single-selector'}
           listIndex={i}
           ref={(c) => {
-            // NOTE: Deliberately not excluding the null refs!
+            if (!c) return;
             widgetRef._singleSelectorCollection[i] = c;
           }}
           bundle={bundle}
