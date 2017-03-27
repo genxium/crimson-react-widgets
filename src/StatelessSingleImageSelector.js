@@ -7,6 +7,8 @@ const SINGLE_UPLOADER_STATE = require('./ImageSelectorBundle').SINGLE_UPLOADER_S
 
 const PlupLoad = require('plupload');
 
+const LIST_INDEX = 'listIndex';
+
 class StatelessSingleImageSelector extends React.Component {
   constructor(props) {
     super(props);
@@ -21,6 +23,73 @@ class StatelessSingleImageSelector extends React.Component {
     };
   }
 
+  _updatePluploadExtUploaderListIndex() {
+    const widgetRef = this;
+    const props = widgetRef.props;
+    const bundle = props.bundle;
+    if (!bundle) return;
+    const extUploader = bundle.extUploader;
+    if (!extUploader) return;
+    extUploader.setOption({
+      listIndex: widgetRef.props.listIndex,
+    });
+  }
+
+  _updatePluploadExtUploaderEventBinding(extUploader) {
+    const widgetRef = this;
+    const props = widgetRef.props;
+    const bundle = props.bundle;
+    const shouldDisable = props.shouldDisable;
+    const onLocalImageAddedBridge = props.onLocalImageAddedBridge;
+    const onUploadedBridge = props.onUploadedBridge;
+    const onProgressBridge = props.onProgressBridge;
+
+    extUploader.bind('FilesAdded', function (up, files) {
+      const targetFile = files[0];
+      const uploaderSelf = this;
+      const listIndex = parseInt(uploaderSelf.getOption(LIST_INDEX));
+      // NOTE: Remove previously added files in the uploader buffer.
+      for (let k in uploaderSelf.files) {
+        const single = uploaderSelf.files[k];
+        if (single && single.id == targetFile.id) continue;
+        uploaderSelf.removeFile(single);
+      }
+
+      if (!widgetRef._validateSelection(targetFile)) {
+        props.showFileRequirementHint();
+        onLocalImageAddedBridge(listIndex, {
+          effectiveImgSrc: null,
+        });
+        return;
+      }
+
+      uploaderSelf.disableBrowse(); // NOTE: Browsing is disabled once a valid image is added for previewing.
+      uploaderSelf.refresh();
+      widgetRef._previewLoader.readAsDataURL(targetFile.getNative());
+    });
+
+    extUploader.bind('UploadProgress', function(up, file) {
+      const uploaderSelf = this;
+      const listIndex = parseInt(uploaderSelf.getOption(LIST_INDEX));
+      onProgressBridge(listIndex, {
+        uploaderState: SINGLE_UPLOADER_STATE.UPLOADING,
+        progressPercentage: file.percent,
+      });
+    });
+    
+    extUploader.bind('FileUploaded', function(up, file, info) {
+      const uploaderSelf = this;
+      const listIndex = parseInt(uploaderSelf.getOption(LIST_INDEX));
+      onUploadedBridge(listIndex, true);
+    });
+
+    extUploader.bind('Error', function (up, err) {
+      const uploaderSelf = this;
+      const listIndex = parseInt(uploaderSelf.getOption(LIST_INDEX));
+      onUploadedBridge(listIndex, false);
+    });
+  }
+
   _softReset() {
     const widgetRef = this;
     const props = widgetRef.props;
@@ -33,12 +102,14 @@ class StatelessSingleImageSelector extends React.Component {
         bundle.extUploader.disableBrowse(props.shouldDisable());
       }
       if (undefined !== bundle.extUploader && null !== bundle.extUploader) {
+        widgetRef._updatePluploadExtUploaderListIndex();
         bundle.extUploader.refresh(); // NOTE: This is to update the `overlying browseButton` height according to the `seemingly browseButton` height. 
       }
       return;
     }
 
     const extUploader = widgetRef.createExtUploader();
+    widgetRef._updatePluploadExtUploaderEventBinding(extUploader);
     props.onNewBundleInitializedBridge(widgetRef.props.listIndex, {
       uploaderState: SINGLE_UPLOADER_STATE.INITIALIZED,
       progressPercentage: 0.0,
@@ -63,12 +134,6 @@ class StatelessSingleImageSelector extends React.Component {
 
   createExtUploader() {
     const widgetRef = this;
-    const props = widgetRef.props;
-    const bundle = props.bundle;
-    const shouldDisable = props.shouldDisable;
-    const onLocalImageAddedBridge = props.onLocalImageAddedBridge;
-    const onUploadedBridge = props.onUploadedBridge;
-    const onProgressBridge = props.onProgressBridge;
 
     // Reference http://www.plupload.com/docs/v2/Uploader.
     const uploader = new PlupLoad.Uploader({
@@ -77,54 +142,18 @@ class StatelessSingleImageSelector extends React.Component {
     });
 
     uploader.init();
-    uploader.bind('FilesAdded', function (up, files) {
-      const targetFile = files[0];
-      const uploaderSelf = this;
-      // NOTE: Remove previously added files in the uploader buffer.
-      for (let k in uploaderSelf.files) {
-        const single = uploaderSelf.files[k];
-        if (single && single.id == targetFile.id) continue;
-        uploaderSelf.removeFile(single);
-      }
-
-      if (!widgetRef.validateSelection(targetFile)) {
-        props.showFileRequirementHint();
-        onLocalImageAddedBridge(widgetRef.props.listIndex, {
-          effectiveImgSrc: null,
-        });
-        return;
-      }
-
-      uploaderSelf.disableBrowse(); // NOTE: Browsing is disabled once a valid image is added for previewing.
-      uploaderSelf.refresh();
-      widgetRef._previewLoader.readAsDataURL(targetFile.getNative());
-    });
-    
-    uploader.bind('UploadProgress', function(up, file) {
-      onProgressBridge(widgetRef.props.listIndex, {
-        uploaderState: SINGLE_UPLOADER_STATE.UPLOADING,
-        progressPercentage: file.percent,
-      });
-    });
-    
-    uploader.bind('FileUploaded', function(up, file, info) {
-      onUploadedBridge(widgetRef.props.listIndex, true);
-    });
-
-    uploader.bind('Error', function (up, err) {
-      onUploadedBridge(widgetRef.props.listIndex, false);
-    });
     return uploader;
   }
 
   startUpload() {
     const widgetRef = this;
     const props = widgetRef.props;
+    const listIndex = props.listIndex;
     const onUploadedBridge = props.onUploadedBridge;
-
+    
     const bundle = props.bundle;
     if (SINGLE_UPLOADER_STATE.UPLOADED == bundle.uploaderState) {
-      onUploadedBridge(widgetRef.props.listIndex, true);
+      onUploadedBridge(listIndex, true);
       return;
     }
     if (SINGLE_UPLOADER_STATE.LOCALLY_PREVIEWING != bundle.uploaderState) {
@@ -149,7 +178,7 @@ class StatelessSingleImageSelector extends React.Component {
 
   }
 
-  validateSelection(file) {
+  _validateSelection(file) {
     const widgetRef = this;
     const props = widgetRef.props;
 
@@ -317,7 +346,7 @@ StatelessSingleImageSelector.propTypes = {
 
   sizePx: React.PropTypes.object.isRequired,
   bundle: React.PropTypes.any.isRequired,
-  listIndex: React.PropTypes.number.isRequired, // NOTE: Access to `listIndex` is deliberately made DYNAMIC in this file!
+  listIndex: React.PropTypes.number.isRequired,
   shouldDisable: React.PropTypes.func.isRequired,
 
   onImageEditorTriggeredBridge: React.PropTypes.func.isRequired,
