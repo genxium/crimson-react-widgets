@@ -10,3 +10,5 @@ exports.SingleImageSelectorBundleListManager = require('./lib/ImageSelectorBundl
 
 exports.StatelessSingleImageSelector = require('./lib/StatelessSingleImageSelector').default;
 exports.StatelessMultiImageSelector = require('./lib/StatelessMultiImageSelector').default;
+
+exports.StatelessSingleVideoSelector = require('./lib/StatelessSingleVideoSelector').default;
