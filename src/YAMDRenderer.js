@@ -6,7 +6,7 @@ const Component = React.Component;
 const katexStyle = require('katex/dist/katex.min.css');
 const katex = require('katex');
 
-var md = require('markdown-it')()
+const md = require('markdown-it')()
 	.disable(['image']);
 
 if ('undefined' != typeof(mermaid)) {
@@ -155,8 +155,6 @@ const YAMDRenderer = React.createClass({
 		});
 	},
 	getInitialState: function () {
-		const widgetRef = this;
-		const props = widgetRef.props;
 		return {
 			dangerousInnerHTML: "",
 			mermaidSubstituteResidualList: [],

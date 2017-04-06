@@ -2,7 +2,7 @@
   "name": "crimson-react-widgets",
   "description": "",
   "repository": "https://github.com/genxium/crimson-react-widgets",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "main": "index.js",
   "dependencies": {
     "katex": "^0.7.1",
