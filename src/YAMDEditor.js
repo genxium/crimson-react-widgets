@@ -2,6 +2,9 @@
 
 const React = require('react');
 const ReactDOM = require('react-dom');
+
+const SinglePicker = require('./SinglePicker').SinglePicker;
+const SinglePickerItem = require('./SinglePicker').SinglePickerItem;
 const YAMDRenderer = require('./YAMDRenderer').default;
 
 const YAMDEditor = React.createClass({
@@ -44,11 +47,11 @@ const YAMDEditor = React.createClass({
     const shouldDisable = props.shouldDisable;
     const sharedIconStyle = props.sharedIconStyle;
 
-    const SinglePicker = props.SinglePicker;
-    const SinglePickerItem = props.SinglePickerItem;     
     const onContentChangedBridge = props.onContentChangedBridge;
 
-    const shouldHideShortcutBar = (undefined == props.shouldHideShortcutBar || null == props.shouldHideShortcutBar ? true : shouldHideShortcutBar);
+    const shouldHideShortcutBar = (undefined == props.shouldHideShortcutBar || null == props.shouldHideShortcutBar ? true : props.shouldHideShortcutBar);
+    const hideVideoPickerWhenListEmpty = (undefined == props.hideVideoPickerWhenListEmpty || null == props.hideVideoPickerWhenListEmpty ? true : props.hideVideoPickerWhenListEmpty);
+    const hideImagePickerWhenListEmpty = (undefined == props.hideImagePickerWhenListEmpty || null == props.hideImagePickerWhenListEmpty ? true : props.hideImagePickerWhenListEmpty);
 
     let videoItemList = [];
     if (undefined !== previewableVideoList && null !== previewableVideoList) {
@@ -74,7 +77,7 @@ const YAMDEditor = React.createClass({
       key: 'video-picker',
       title: props.previewableVideoPickerTitle,
       style: {
-        display: 'inline-block',
+        display: (hideVideoPickerWhenListEmpty && 0 == videoItemList.length ? 'none' : 'inline-block'),
       }
     }, videoItemList);
 
@@ -102,7 +105,7 @@ const YAMDEditor = React.createClass({
       key: 'image-picker',
       title: props.previewableImagePickerTitle,
       style: {
-        display: 'inline-block',
+        display: (hideImagePickerWhenListEmpty && 0 == imageItemList.length ? 'none' : 'inline-block'),
       }
     }, imageItemList);
 
@@ -267,13 +270,33 @@ const YAMDEditor = React.createClass({
       }
     }, props.indentationIcon);
 
+    const alignCenterBtnStyle = {};
+    Object.assign(alignCenterBtnStyle, sharedIconStyle);
+    Object.assign(alignCenterBtnStyle, {
+      display: ((!props.alignCenterTag || !props.alignCenterIcon) ? 'none' : 'inline-block'),
+    });
+
+		const alignCenterBtn = React.createElement('button', {
+      style: alignCenterBtnStyle,
+			onClick: (evt) => {
+				if (!widgetRef._inputRef) return;
+				const inputElement = ReactDOM.findDOMNode(widgetRef._inputRef);
+				const stIndex = inputElement.selectionStart;
+				const edIndex = inputElement.selectionEnd;
+				if (edIndex <= stIndex) return; 
+				const currentValue = widgetRef._inputRef.value;
+				const newValue = currentValue.slice(0, stIndex) + "\n!{" + props.alignCenterTag + "}%\n" + currentValue.slice(stIndex, edIndex) + "\n%\n" + currentValue.slice(edIndex, currentValue.length);
+				onContentChangedBridge(newValue);
+			},
+    }, props.alignCenterIcon);
+
     const shortcutBar = React.createElement('div', {
       key: 'shortcut-bar',
       style: {
         display: (shouldDisable() || shouldHideShortcutBar ? 'none' : 'block'),
         paddingBottom: 3,
       }
-    }, videoPicker, imagePicker, makeHighlightBtn, addFenceBtn, makeBoldBtn, makeItalicBtn, strikeOutBtn, addLinkBtn, listInsertion, indentationInsertion, mathSampleInsertion, seqDiagramInsertion, veGraphInsertion); 
+    }, videoPicker, imagePicker, makeHighlightBtn, addFenceBtn, makeBoldBtn, makeItalicBtn, strikeOutBtn, addLinkBtn, listInsertion, indentationInsertion, mathSampleInsertion, seqDiagramInsertion, veGraphInsertion, alignCenterBtn); 
 
     const input = React.createElement('textarea', {
       key: 'md-editor-input',
@@ -335,6 +358,7 @@ const YAMDEditor = React.createClass({
       imgTag: props.imgTag,
       ktxTag: props.ktxTag,
       mermaidTag: props.mermaidTag,
+      alignCenterTag: props.alignCenterTag,
       previewableVideoList: previewableVideoList,
       previewableImageList: previewableImageList,
       source: previewSrc,
@@ -369,6 +393,7 @@ YAMDEditor.propTypes = {
   highlightIcon: React.PropTypes.any.isRequired, 
   boldIcon: React.PropTypes.any.isRequired,
   italicIcon: React.PropTypes.any.isRequired, 
+  alignCenterIcon: React.PropTypes.any,
 
   previewHint: React.PropTypes.string.isRequired,
 
@@ -376,18 +401,20 @@ YAMDEditor.propTypes = {
   onContentChangedBridge: React.PropTypes.func.isRequired, 
   shouldDisable: React.PropTypes.func.isRequired,
 
-	imgTag: React.PropTypes.string.isRequired,
-	videoTag: React.PropTypes.string.isRequired,
-	ktxTag: React.PropTypes.string.isRequired,
-	mermaidTag: React.PropTypes.string.isRequired,
+  imgTag: React.PropTypes.string.isRequired,
+  videoTag: React.PropTypes.string.isRequired,
+  ktxTag: React.PropTypes.string.isRequired,
+  mermaidTag: React.PropTypes.string.isRequired,
+  alignCenterTag: React.PropTypes.string,
 
-	previewableImageList: React.PropTypes.array,
-	previewableVideoList: React.PropTypes.array,
+  previewableImageList: React.PropTypes.array,
+  previewableVideoList: React.PropTypes.array,
+
+  
 
   shouldHideShortcutBar: React.PropTypes.bool,
-
-  SinglePicker: React.PropTypes.func.isRequired,
-  SinglePickerItem: React.PropTypes.func.isRequired,
+  hideVideoPickerWhenListEmpty: React.PropTypes.bool, 
+  hideImagePickerWhenListEmpty: React.PropTypes.bool, 
 }
 
 exports.default = YAMDEditor;

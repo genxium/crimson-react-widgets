@@ -98,6 +98,11 @@ const YAMDRenderer = React.createClass({
 	alnctrContentSubmittableToRenderableAsync: function (content) {
 		const widgetRef = this;
 		const props = widgetRef.props;
+    if (undefined === props.alignCenterTag || null === props.alignCenterTag) {
+      return new Promise(function (resolve, reject) {
+        resolve(content);
+      });
+    }
 
 		const regex = new RegExp('\!\{' + props.alignCenterTag + '\}\%([^%]+)\%', 'g');
 		const newContent = content.replace(regex, function (match, param1, offset, wholeString) {
@@ -236,6 +241,7 @@ YAMDRenderer.propTypes = {
 	imgTag: React.PropTypes.string.isRequired,
 	ktxTag: React.PropTypes.string.isRequired,
 	mermaidTag: React.PropTypes.string.isRequired,
+  alignCenterTag: React.PropTypes.string,
 
 	previewableImageList: React.PropTypes.array,
 	previewableVideoList: React.PropTypes.array,

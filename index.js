@@ -15,3 +15,6 @@ exports.StatelessMultiImageSelector = require('./lib/StatelessMultiImageSelector
 exports.StatelessSingleVideoSelector = require('./lib/StatelessSingleVideoSelector').default;
 
 exports.KeywordListView = require('./lib/KeywordListView').default;
+
+exports.SinglePicker = require('./lib/SinglePicker').SinglePicker;
+exports.SinglePickerItem = require('./lib/SinglePicker').SinglePickerItem;

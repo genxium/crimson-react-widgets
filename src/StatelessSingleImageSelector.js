@@ -266,6 +266,7 @@ class StatelessSingleImageSelector extends React.Component {
           position: "absolute",
           width: sizePx.w,
           height: sizePx.h,
+          verticalAlign: "middle",
         }}
       >
         <Image
@@ -297,6 +298,9 @@ class StatelessSingleImageSelector extends React.Component {
     );
 
     const BrowserButtonComponent = props.BrowserButtonComponent;
+    const browseButtonHeightPx = parseInt(sizePx.h * 0.7);
+    const browseButtonTopOffsetPx = ((sizePx.h - browseButtonHeightPx) >> 1); 
+
     const browseButton = (
       <View
       key='single-image-selector-browse-btn'
@@ -314,7 +318,15 @@ class StatelessSingleImageSelector extends React.Component {
         widgetRef._browseBtnRef = c;
       }}
       >
-        <BrowserButtonComponent />
+        <BrowserButtonComponent 
+        style={{
+          position: "absolute",
+          top: browseButtonTopOffsetPx,
+          width: sizePx.w,
+          height: browseButtonHeightPx,
+          lineHeight: browseButtonHeightPx + 'px',
+        }}
+        />
       </View>
     );
 
