@@ -27,6 +27,7 @@ class KeywordListView extends React.Component {
 
     const deleteButtonStyle = {
       display: (shouldDisable() ? 'none' : 'inline-block'),
+      borderRadius: 20,
       border: 'none',
       paddingTop: 0,
       paddingLeft: 0,
