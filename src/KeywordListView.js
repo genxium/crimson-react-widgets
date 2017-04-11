@@ -17,6 +17,7 @@ class KeywordListView extends React.Component {
     const widgetRef = this;
     const props = widgetRef.props;
 
+    const shouldDisable = props.shouldDisable;
     const View = props.View;
     const Button = props.Button;
 
@@ -24,26 +25,29 @@ class KeywordListView extends React.Component {
     const backgroundColor = props.backgroundColor;
     const fontColor = props.fontColor;
 
-    const shouldDisable = props.shouldDisable;
+    const deleteButtonStyle = {
+      display: (shouldDisable() ? 'none' : 'inline-block'),
+      border: 'none',
+      paddingTop: 0,
+      paddingLeft: 0,
+      paddingBottom:0,
+      paddingRight: 5,
+      width: 20,
+      height: 20,
+      backgroundColor: backgroundColor,
+      color: fontColor,
+    };
+    if (undefined !== props.deleteButtonStyle && null !== props.deleteButtonStyle) {
+      Object.assign(deleteButtonStyle, props.deleteButtonStyle);
+    }
+
     const keywordList = props.keywordList;
     const onSingleKeywordDeleteTriggeredBridge = props.onSingleKeywordDeleteTriggeredBridge;
 
     const deleteButton = (
       <Button
       disabled={shouldDisable()}
-      style={{
-        display: (shouldDisable() ? 'none' : 'inline-block'),
-        borderRadius: 20,
-        paddingTop: 0,
-        paddingLeft: 0,
-        paddingBottom:0,
-        paddingRight: 5,
-        width: 20,
-        height: 20,
-        verticalAlign: 'baseline',
-        backgroundColor: backgroundColor,
-        color: fontColor,
-      }}
+      style={deleteButtonStyle}
       onPress={ (evt) => {
         onSingleKeywordDeleteTriggeredBridge(idx);  
       }}
@@ -168,6 +172,8 @@ KeywordListView.propTypes = {
   Input: React.PropTypes.func.isRequired,
 
   deleteButtonSymbol: React.PropTypes.any.isRequired,
+  deleteButtonStyle: React.PropTypes.object,
+
   backgroundColor: React.PropTypes.any.isRequired,
   fontColor: React.PropTypes.any.isRequired,
 
